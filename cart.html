@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cart</title>
+    <style>
+        body {
+            margin: 0px;
+            font-family: Inter, sans-serif;
+        }
+
+        #container {
+            display: flex;
+            justify-content: space-around;
+        }
+
+        #main {
+            width: 75%;
+            display: grid;
+            grid-template-columns: repeat(6, 1fr);
+            grid-template-rows: auto;
+            gap: 10px;
+        }
+
+        #total {
+            border: 2px solid #1c2838;
+            width: 17%;
+            padding: 0px 0px 50px 20px;
+            box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px, rgb(51, 51, 51) 0px 0px 0px 3px;
+        }
+
+        #main>div {
+            padding: 5px;
+        }
+
+        #main>div:hover {
+            border: 1px solid #1c2838;
+        }
+
+        img {
+            width: 100%;
+        }
+
+        h1 {
+            font-size: 45px;
+            width: 35%;
+            text-align: center;
+            margin: auto;
+        }
+
+        #navbar {
+            padding: 0px 30px;
+            height: 75px;
+            background-color: #0a6ae8;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 20px;
+            color: white;
+            position: sticky;
+            top: 0px;
+        }
+
+        #navbar>div+div {
+            width: 30%;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        #navbar>div+div>div {
+            cursor: pointer;
+        }
+
+        #navbar>div+div>div:hover {
+            text-decoration: underline;
+            color: rgb(200, 190, 190);
+            transition: 0.2s;
+        }
+
+        #promocode,
+        #promoBtn {
+            padding: 10px;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="navbar">
+        <div>E-Commerce</div>
+        <div>
+        </div>
+    </div>
+    <h1>Your All Items Are Here</h1>
+    <div id="container">
+        <div id="main">
+        </div>
+        <div id="total"></div>
+    </div>
+</body>
+
+</html>
+<script>
+
+    let flag1 = JSON.parse(localStorage.getItem("flag1")) || false;
+    const main = document.querySelector('#navbar>div:last-child');
+    const div1 = document.createElement('div');
+    div1.addEventListener("click", function () {
+        if (flag1 == false) {
+            window.location.href = "login.html";
+        }
+        else {
+            window.location.href = "mens.html";
+        }
+    });
+    div1.innerText = "Men";
+    const div2 = document.createElement('div');
+    div2.addEventListener("click", function () {
+        if (flag1 == false) {
+            window.location.href = "login.html";
+        }
+        else {
+            window.location.href = "womens.html";
+        }
+    });
+    div2.innerText = "Women";
+    const div3 = document.createElement('div');
+    div3.addEventListener("click", function () {
+        window.location.href = "login.html";
+    });
+    div3.innerText = "Login";
+    const div4 = document.createElement('div');
+    div4.addEventListener("click", function () {
+        window.location.href = "sign-up.html";
+    });
+    div4.innerText = "Sign up";
+    const cart = document.createElement('div');
+    cart.innerText = "Cart";
+    cart.addEventListener("click", function () {
+        if (flag1 == false) {
+            window.location.href = "login.html";
+        }
+        else {
+            window.location.href = "cart.html";
+        }
+    })
+    main.append(div1, div2, div3, div4, cart);
+
+    let cart_data = JSON.parse(localStorage.getItem("cartData")) || [];
+
+    display_cart(cart_data);
+    function display_cart(cart_data) {
+        let grandTotal = 0;
+        const mens = document.querySelector('#main');
+        const total = document.querySelector('#total');
+        total.innerHTML = `<h2>Total Items: ${cart_data.length}</h2>`;
+        mens.innerHTML = "";
+        cart_data.map((ele, index) => {
+            let totalAmount = ele.price * ele.quantity;
+            grandTotal += totalAmount;
+            const div = document.createElement('div');
+            div.innerHTML = `
+            <img src="${ele.image_url}" alt="error">
+            <p>${ele.name}</p>
+            <p>$${ele.price}</p>`;
+            const p1 = document.createElement('p');
+            p1.innerText = "Quantity: " + ele.quantity + ", Total: $" + totalAmount;
+            const btn1 = document.createElement('button');
+            btn1.innerText = "inc qnt";
+
+            btn1.addEventListener("click", function () {
+                increament_item(ele);
+                p1.innerText = "Qnt: " + ele.quantity + ", Total: $" + totalAmount;
+            });
+
+            const btn2 = document.createElement('button');
+            btn2.innerText = "dec qnt";
+
+
+            btn2.addEventListener("click", function () {
+                decreament_item(ele);
+                p1.innerText = "Qnt: " + ele.quantity + "Total: $" + totalAmount;
+            });
+
+            const deleteButton = document.createElement('button');
+            deleteButton.innerText = "DELETE";
+            deleteButton.addEventListener("click", function () {
+                delete_item(index);
+            });
+
+            div.append(btn1, btn2, deleteButton, p1);
+            mens.append(div);
+
+            total.innerHTML += `<p>${index + 1}. ${ele.name}: $${totalAmount}</p>`;
+
+        });
+        total.innerHTML += `<h2 id="gtotal">Grand Total: $${grandTotal}</h2><input type=" text" name="" id="promocode" placeholder="enter promo code">
+<button id="promoBtn">Apply Promo</button>`;
+        document.querySelector('#promoBtn').addEventListener("click", function () {
+            const promocode = document.querySelector('#promocode');
+            const gTotal = document.querySelector('#gtotal');
+            if (promocode.value === "masai30") {
+                grandTotal = (grandTotal * 70) / 100;
+                gTotal.innerText = "Grand Total: $" + grandTotal;
+            }
+        })
+
+
+    }
+
+    //delete item
+    function delete_item(index) {
+        cart_data.splice(index, 1);
+        localStorage.setItem("cartData", JSON.stringify(cart_data));
+        display_cart(cart_data);
+    }
+    //increament item quantity
+    function increament_item(ele) {
+        ele.quantity++;
+        localStorage.setItem("cartData", JSON.stringify(cart_data));
+        display_cart(cart_data);
+    }
+
+    //decreament item quantity
+    function decreament_item(ele) {
+        ele.quantity--;
+        localStorage.setItem("cartData", JSON.stringify(cart_data));
+        display_cart(cart_data);
+    }
+</script>
